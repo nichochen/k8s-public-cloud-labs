@@ -24,7 +24,7 @@ Kubernetes是云计算时代的操作系统，Kubernetes可以运行在几乎所
 ### 1.2 云端的Shell
 用户可以通过Azure提供的Web控制台，完成对Kubernetes集群的创建。但是为了让描述更为准确，本文使用Azure的命令行工具Azure CLI完成相关的演示操作。
 
-要使用Azure ClI，读者可以在自己的电脑上安装该工具。但是，在云的时代，我们也可以利用云所提供的便利，直接使用云上使用所需要的工具。Azure Cloud Shell是Azure提供的一个Web界面的Shell，用户可以在Azure Cloud Shell中使用Azure CLI、Terraform及Ansible等云管工具。
+要使用Azure CLI，读者可以在自己的电脑上安装该工具。但是，在云的时代，我们也可以利用云所提供的便利，直接使用云上使用所需要的工具。Azure Cloud Shell是Azure提供的一个Web界面的Shell，用户可以在Azure Cloud Shell中使用Azure CLI、Terraform及Ansible等云管工具。
 
 > 提示！ 点击打开Azure Cloud Shell：https://shell.azure.com/
 
