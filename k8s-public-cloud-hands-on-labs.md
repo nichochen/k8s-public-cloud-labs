@@ -4,7 +4,7 @@
 | 作者 | 陈耿 微软全球技术黑带 |
 |联系|微信公众号“云来有道”|
 
-Kubernetes是云计算时代的操作系统，Kubernetes可以运行在几乎所有的主流基础架构之上：笔记本、私有数据中心、私有云、公有云，甚至Raspberry Pi之上。许多朋友对Kubernetes的认识都是从私有的场景开始的，公有云是Kubernetes的一个重要的场景，具有广阔的前景。本系列实验将通过一些实际的例子给大家介绍有关公有云的Kubernetes实现和特点，帮助大家了解如何使用公有云Kubernetes服务更好地用好Kubernetes，提高应用开发、部署和管理的效率。
+Kubernetes是云计算时代的操作系统，Kubernetes可以运行在几乎所有的主流基础架构之上：笔记本、私有数据中心、私有云、公有云，甚至是Raspberry Pi之上。许多朋友对Kubernetes的认识都是从私有基础架构开始。公有云是Kubernetes的一个重要的场景，具有广阔的前景。本系列实验将通过一些实际的例子给大家介绍有关公有云的Kubernetes实现和特点，帮助大家了解如何使用公有云Kubernetes服务更好地用好Kubernetes，提高应用开发、部署和管理的效率。
 
 # 目录
 - [实验一 冲上云霄的Kubernetes！](#lab01)
@@ -18,13 +18,13 @@ Kubernetes是云计算时代的操作系统，Kubernetes可以运行在几乎所
 
 ## 1 热身运动
 ### 1.1 注册Azure公有云账号
-本文将通过Azure公有云的Kubernetes服务Azure Kubernetes Service（AKS）快速地创建一个Kubernetes集群。还没有Azure账号的同学可以通过以下的连接免费申请，目前Azure为新用户提供了200美金的免费使用额度。
+本文将通过Azure公有云的Kubernetes服务Azure Kubernetes Service（AKS）快速地创建一个Kubernetes集群。还没有Azure账号的同学可以通过以下的连接免费申请，目前Azure为新用户提供了200美金的免费使用额度，足以支持完成本实验的内容。
 >提示！点击打开注册页面 https://azure.microsoft.com/zh-cn/free/
 
 ### 1.2 云端的Shell
 用户可以通过Azure提供的Web控制台，完成对Kubernetes集群的创建。但是为了让描述更为准确，本文使用Azure的命令行工具Azure CLI完成相关的演示操作。
 
-要使用Azure CLI，读者可以在自己的电脑上安装该工具。但是，在云的时代，我们也可以利用云所提供的便利，直接使用云上使用所需要的工具。Azure Cloud Shell是Azure提供的一个Web界面的Shell，用户可以在Azure Cloud Shell中使用Azure CLI、Terraform及Ansible等云管工具。
+要使用Azure CLI，读者可以在自己的电脑上安装该工具。但是，在云的时代，我们也可以利用云所提供的便利，直接在云上使用所需要的工具。Azure Cloud Shell是Azure提供的一个Web Shell，用户可以在Azure Cloud Shell中使用Azure CLI、Terraform及Ansible等云管工具。
 
 > 提示！ 点击打开Azure Cloud Shell：https://shell.azure.com/
 
@@ -44,18 +44,20 @@ Azure Cloud Shell固然很方便，但是有的朋友还是喜欢在本地执行
     $ az group create -n k8s-cloud-labs -l eastus
     $ az aks create -g k8s-cloud-labs -n k8s-cluster --disable-rbac --generate-ssh-keys
 
-第一条命令是创建一个资源组，可以认为这是Azure上的存放对象的文件夹。这里我们选择使用East US数据中心。第二条命令是真正创建Kubernetes的命令。`az aks`命令是操作AKS服务的子命令。我们在资源组`k8s-cloud-labs`中创建了一个名为`k8s-cluster`的集群。命令执行后，稍等片刻。5-10分钟后一个生产可用的Kubernetes将会就绪。
+第一条命令是创建一个资源组，可以认为这是Azure上的存放对象的文件夹。这里我们选择使用East US数据中心。
 
-> 提示！AKS提供Kubernetes RBAC鉴权模型的支持。为了简化实验环境，本文通过参数`--disable-rbac`禁用了此功能。在安全方面，Azure的Kubernetes用户可以将AKS于Azure Active Directory服务进行集成，实现Kubernetes与企业身份验证系统的对接。
+第二条命令是真正创建Kubernetes集群的命令。`az aks`命令是操作AKS服务的子命令。我们在资源组`k8s-cloud-labs`中创建了一个名为`k8s-cluster`的集群。命令执行后，稍等片刻。5-10分钟后一个生产可用的Kubernetes将会就绪。
 
-执行如下命令可以查看当前Azure账号下已经创建的Kubernetes集群列表。
+> 提示！AKS提供Kubernetes RBAC鉴权模型的支持。为了简化实验环境，本文通过参数`--disable-rbac`禁用了此功能。在安全方面，Azure的Kubernetes用户可以将AKS的Kubernetes集群与Azure Active Directory服务进行集成，实现Kubernetes与企业身份验证系统的对接。
+
+执行如下命令可以查看当前Azure账号下已经创建好的Kubernetes集群列表。
 
     $ az aks list -o table
    
 > 提示！命令`az aks`还有许多有用的参数，通过命令`az aks -h`可以查看更多详细的信息。
 
 ### 2.2 访问Kubernetes集群
-Kubernetes集群就绪后，下一步就可以通过Kubernetes的命令行`kubectl`对集群进行访问。读者可以自己到Kubernetes的GitHub主页上下载对应版本的kubectl。也可以在Cloud Shell中直接执行如下命令自动下载并安装kubectl。
+Kubernetes集群就绪后，下一步就可以通过Kubernetes的命令行`kubectl`对集群进行访问。读者可以自己到Kubernetes的GitHub主页上下载对应版本的kubectl。也可以在本地环境中直接执行如下命令自动下载并安装kubectl。
 
     $ az aks install-cli
 
@@ -66,7 +68,7 @@ kubectl安装完毕后，执行如下命令获取Kubernetes集群的连接信息
     $ az aks get-credentials -g k8s-cloud-labs -n k8s-cluster
     Merged "k8s-cluster" as current context in /home/nicholas/.kube/config
 
-一切就绪后就便可以通过命令行操作Kuberentes集群。
+一切就绪后，便可以通过`kubectl`命令操作Kuberentes集群。
 
     $ kubectl get nodes
     NAME                       STATUS    ROLES     AGE       VERSION
@@ -74,13 +76,13 @@ kubectl安装完毕后，执行如下命令获取Kubernetes集群的连接信息
     aks-nodepool1-16810059-1   Ready     agent     10m       v1.9.11
     aks-nodepool1-16810059-2   Ready     agent     10m       v1.9.11
 
-通过输出看到命令列出了Kubernetes集群的节点列表。`az aks create`命令默认创建了3个节点。通过参数`--node-count`用户可以指定集群计算节点（node）的数量。目前单集群最大支持100个节点。
+通过输出看到命令列出了Kubernetes集群的节点列表。`az aks create`命令默认创建了一个含有3个计算节点的集群。通过参数`--node-count`用户可以指定集群计算节点（node）的数量。目前单集群最大支持100个节点。
 
 > 提示！命令`kubectl get nodes`的输出中只包含了Kubernetes集群的Node节点，而没有包含Master节点，这是为什么呢？这是因为AKS提供的是一个Kubernetes的托管服务，Kuberentes的Master节点将由Azure负责运维，用户无需操劳。用户也无需为Master节点所使用的资源支付任何费用。用户可以专注于Kubernetes Node节点的应用部署和管理。这将极大地简化了Kubernetes集群的运维，也节省了费用开销。
 
 ### 2.3 部署一个Nginx容器
 
-通过AKS，我们快速地获取了一个生产可用的Kubernetes集群，接下来我们将部署一个简单的Nginx容器到刚创建好的Kubernetes集群中去。
+通过AKS，我们快速地获取了一个生产可用的Kubernetes集群，接下来我们将部署一个简单的Nginx容器到刚创建好的Kubernetes集群。
 
 执行如下命令创建一个Kubernetes的命名空间。
 
@@ -103,7 +105,7 @@ kubectl安装完毕后，执行如下命令获取Kubernetes集群的连接信息
 
     $ kubectl expose deployment frontend --type LoadBalancer --port 80 -n lab01
 
-上文指定Service的类型为`LoadBalancer`，这样Azure将会为这个Service分配一个公网IP地址。稍等片刻，查看刚创建的Service时便可以看到EXTERNAL-IP一栏中显示了该Service的公网IP地址。
+上文指定Service的类型为`LoadBalancer`，这样Azure将会为这个Service分配一个公网IP地址。稍等片刻，查看刚创建的Service时便可以看到`EXTERNAL-IP`一栏中显示了该Service的公网IP地址。
 
     $ kubectl get svc -n lab01
     NAME       TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)        AGE
@@ -117,10 +119,10 @@ kubectl安装完毕后，执行如下命令获取Kubernetes集群的连接信息
     <head>
     <title>Welcome to nginx!</title>
 
-> 提示！因为Kubernetes在Azure公有云之上，因此可以很便捷地通过LoadBalancer类型的Service将运行在Kubernetes集群上的容器应用服务发布到互联网上。除了Service之外，AKS还提供了Application Routing这一Ingress功能，帮助用户快速将应用发布到互联网上，提供对外服务。
+> 提示！因为Kubernetes在Azure公有云之上，因此可以很便捷地通过LoadBalancer类型的Service将运行在Kubernetes集群上的容器应用服务发布到互联网上。除了Service之外，AKS还提供了Application Routing这一Ingress功能，帮助用户快速将应用发布到互联网上，对外提供服务。
 
 ### 2.5 管理控制台
-AKS提供的是经过测试的原生的Kubernetes集群，默认也部署了Kubernetes Dashboard。用户在本地可以通过如下命令直接打开Dashboard。
+AKS提供的是经过测试的原生的Kubernetes集群，默认也部署了Kubernetes Dashboard。用户在本地主机上可以通过如下命令直接打开Dashboard。
     
     $ az aks browse -g k8s-cloud-labs -n k8s-cluster
 
