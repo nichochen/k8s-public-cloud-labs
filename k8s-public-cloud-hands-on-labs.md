@@ -321,6 +321,11 @@ Kubernetes的日志和监控指标的收集可以通过开源的Fluentd、Elasti
     aks-nodepool1-16810059-1   Ready     agent     4m        v1.10.9
     aks-nodepool1-16810059-2   Ready     agent     11m       v1.10.9
 
+### 2 清理环境
+实验结束，删除Kubernetes命名空间，清理实验环境。
+
+    $ kubectl delete ns lab02
+
 # <a name="lab03"></a>实验三 结合Kuberentes的容器应用开发
 实验难度：中级 | 实验用时：45分钟
 ## 1 准备本地开发环境
@@ -368,7 +373,7 @@ Draft将在应用的目录下生成许多配置相关的文件。
 ### 1.6 镜像仓库
 应用容器化后将会生成容器镜像。容器镜像的存放也是一个需要重点关注的问题。用户可以将镜像存放在公共的镜像仓库或私有的镜像仓库中。Azure Container Registry（ACR）是Azure提供的一个镜像仓库服务。ACR是一个提供企业级安全和全球镜像同步功能的镜像仓库。
 
-执行以下命令，创建一个ACR仓库。
+执行以下命令，创建一个ACR仓库。本示例使用的镜像仓库名称为`k8scloudlabs`，请根据实际情况选择可用的镜像仓库名称。
 
     $ az acr create -g k8s-cloud-labs -n k8scloudlabs --sku Standard
     NAME          RESOURCE GROUP    LOCATION    SKU       LOGIN SERVER             CREATION DATE         ADMIN ENABLED
@@ -390,7 +395,9 @@ ACR是一个带有安全认证机制的镜像仓库，AKS访问ACR下载镜像�
     ACR_ID=$(az acr show -n $ACR_NAME -g $ACR_RESOURCE_GROUP --query "id" -o tsv)
     az role assignment create --assignee $CLIENT_ID --role Reader --scope $ACR_ID
 
-> 提示！在Windows桌面中运行`az role`命令出错的情况下，可以将完整的命令拷贝至CMD中执行。
+> 提示！在Windows桌面中运行`az role`命令出错的情况下，可以将如下命令的输出拷贝至CMD中执行。
+
+    $ echo az role assignment create --assignee $CLIENT_ID --role Reader --scope $ACR_ID
 
 ### 1.8 云端容器镜像构建
 ACR不单止提供容器镜像的存取服务，ACR还提供基于云端的容器镜像构建服务。这意味着开发人员甚至不需要在本地开发环境安装Docker就可以进行容器镜像的构建。
